@@ -67,7 +67,7 @@
         </b-button>
       </b-form>
       <p class="mt-3 mb-3 text-muted text-center">
-        © 2007–{{ new Date().getFullYear() }}
+        ©{{ new Date().getFullYear() }}
       </p>
       <!-- form:: password-->
     </b-card>
@@ -145,7 +145,6 @@ export default {
           .dispatch("auth/login", {
             email,
             password,
-            device: "web",
           })
           .then(() => this.$router.push({ name: "tickets" }))
           .catch(() => {

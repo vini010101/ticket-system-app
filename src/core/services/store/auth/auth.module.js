@@ -1,97 +1,73 @@
+// src/core/services/store/auth/auth.module.js
+
 import ApiService from "@/core/services/api.service";
 import JwtService from "@/core/services/jwt.service";
-import { reject } from "eslint-plugin-promise/rules/lib/promise-statics";
 
-// action types
-export const VERIFY_AUTH = "verifyAuth";
+// Mutation types
+export const SET_AUTH = "SET_AUTH";
+export const PURGE_AUTH = "PURGE_AUTH";
+export const SET_ERROR = "SET_ERROR";
+
+// Action types
 export const LOGIN = "login";
 export const LOGOUT = "logout";
-
-// mutation types
-export const PURGE_AUTH = "logOut";
-export const SET_AUTH = "setUser";
-export const SET_ERROR = "setError";
 
 const state = {
   errors: null,
   user: {},
-  isAuthenticated: !!JwtService.getToken(),
+  token: JwtService.getToken() || null,
 };
 
 const getters = {
-  currentUser(state) {
-    return state.user;
-  },
-  isAuthenticated(state) {
-    return state.isAuthenticated;
-  },
+  isAuthenticated: (state) => !!state.token,
+  currentUser: (state) => state.user,
+  authErrors: (state) => state.errors,
 };
 
 const actions = {
   [LOGIN](context, credentials) {
     return new Promise((resolve, reject) => {
       ApiService.setHeader();
-      ApiService.post("auth/login", credentials)
+      ApiService.post("api/login-token/", credentials)
         .then(({ data }) => {
-          context.commit(SET_AUTH, data.data);
+          context.commit(SET_AUTH, data);
           resolve(data);
         })
-        .catch(({ message }) => {
-          reject(message);
+        .catch((error) => {
+          const message =
+            error.response?.data?.detail || error.message || "Login failed";
           context.commit(SET_ERROR, message);
+          reject(message);
         });
     });
   },
+
   [LOGOUT](context) {
-    if (JwtService.getToken()) {
-      return new Promise((resolve, reject) => {
-        ApiService.setHeader();
-        ApiService.get("auth/logout")
-          .then(({ data }) => {
-            context.commit(PURGE_AUTH);
-            resolve(data);
-          })
-          .catch(({ message }) => {
-            reject(message);
-            context.commit(SET_ERROR, message);
-          });
-      });
-    } else {
-      context.commit(PURGE_AUTH);
-    }
-  },
-  [VERIFY_AUTH](context) {
-    if (JwtService.getToken()) {
-      ApiService.setHeader();
-      ApiService.get("auth", "verify")
-        .then(({ data }) => {
-          context.commit(SET_AUTH, data.data);
-        })
-        .catch(({ response }) => {
-          JwtService.destroyToken();
-          context.commit(PURGE_AUTH);
-          context.commit(SET_ERROR, response.message);
-        });
-    } else {
-      context.commit(PURGE_AUTH);
-    }
+    context.commit(PURGE_AUTH);
   },
 };
 
 const mutations = {
-  [SET_ERROR](state, error) {
-    state.errors = error;
+  [SET_AUTH](state, data) {
+    state.user = {
+      id: data.user_id,
+      username: data.username,
+      email: data.email,
+      tipo: data.tipo,
+    };
+    state.token = data.token;
+    state.errors = null;
+    JwtService.saveToken(data.token);
   },
-  [SET_AUTH](state, user) {
-    state.isAuthenticated = true;
-    state.user = user;
-    state.errors = {};
-    JwtService.saveToken(state.user.token);
+
+  [SET_ERROR](state, message) {
+    state.errors = message;
   },
+
   [PURGE_AUTH](state) {
-    state.isAuthenticated = false;
     state.user = {};
-    state.errors = {};
+    state.token = null;
+    state.errors = null;
     JwtService.destroyToken();
   },
 };
