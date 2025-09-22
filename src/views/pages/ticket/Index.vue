@@ -68,18 +68,18 @@
     <!-- Begin:: Form Ticket -->
     <div v-else>
       <fieldset class="m-1 border-dark" v-if="!isAdd">
-        <legend>Form Ticket</legend>
+        <legend>Criar Novo Ticket</legend>
         <!-- begin:: form   -->
         <form ref="formEmployee" @submit.stop.prevent="onSubmit" class="my-2">
           <b-row>
             <b-col xl="3">
               <b-form-group
-                label="Subject:"
-                label-for="title"
-                invalid-feedback="Subject is required"
+                label="Assunto:"
+                label-for="assunto"
+                invalid-feedback="O assunto é obrigatório"
               >
                 <b-form-input
-                  id="title"
+                  id="assunto"
                   v-model="$v.form.title.$model"
                   @input="$v.form.title.$reset()"
                   @blur="$v.form.title.$touch()"
@@ -89,23 +89,8 @@
               </b-form-group>
             </b-col>
 
-            <b-col xl="3">
-              <b-form-group
-                label="Date From:"
-                label-for="date"
-                invalid-feedback="Date is required"
-              >
-                <b-form-input
-                  type="datetime-local"
-                  v-model="$v.form.date.$model"
-                  :state="validateState({ name: 'date' })"
-                >
-                </b-form-input>
-              </b-form-group>
-            </b-col>
-
             <b-col xl="6">
-              <b-form-group label="Employee(s):" label-for="employees">
+              <b-form-group label="Técnico Responsável:" label-for="Técnico">
                 <Multiselect
                   v-model="$v.form.employees.$model"
                   :options="employees"
@@ -113,7 +98,7 @@
                   :close-on-select="false"
                   :clear-on-select="false"
                   :preserve-search="true"
-                  placeholder="Pick some"
+                  placeholder="selecionar Técnico"
                   label="name"
                   track-by="name"
                   :preselect-first="false"
@@ -139,9 +124,9 @@
           </b-row>
           <b-row>
             <b-col xl="3">
-              <b-form-group label="Category:" label-for="category">
+              <b-form-group label="Categoria:" label-for="categoria">
                 <b-form-select
-                  id="category"
+                  id="categoria_id"
                   class="mr-2"
                   v-model="$v.form.selectedCategories.$model"
                   :options="categories"
@@ -151,7 +136,7 @@
                   <template #first>
                     <b-form-select-option value="" disabled
                       >--
-                      {{ " Please select one of the options " }}
+                      {{ "Selecione uma categoria" }}
                       --</b-form-select-option
                     >
                   </template>
@@ -163,9 +148,9 @@
             </b-col>
 
             <b-col xl="3">
-              <b-form-group label="Status:" label-for="status">
+              <b-form-group label="Prioridade:" label-for="prioridade">
                 <b-form-select
-                  id="status"
+                  id="prioridade"
                   class="mr-2"
                   v-model="$v.form.selectedStatus.$model"
                   :options="statuses"
@@ -180,8 +165,8 @@
                     >
                   </template>
                 </b-form-select>
-                <b-form-invalid-feedback id="status-live-feedback">
-                  {{ "Status is required" }}
+                <b-form-invalid-feedback id="prioridade">
+                  {{ "selecionar prioridade" }}
                 </b-form-invalid-feedback>
               </b-form-group>
             </b-col>
